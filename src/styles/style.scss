@@ -1,0 +1,59 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  background-color: lightcoral;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  place-items: center;
+  width: 32rem;
+  margin: 0 auto;
+  background-color: #242424;
+}
+
+.field {
+  border: 2px solid grey;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  .figure {
+    height: 100%;
+    width: 100%;
+    img{
+      height: 100%;
+      width: 100%;
+    }
+  }
+}
+
+.field.light {
+  background-color: lightgray;
+}
+
+// .figure.knight {
+//   background-image: url('https://www.chess.com/chess-themes/pieces/neo/150/bn.png');
+//   background-size: 100%;
+// }
