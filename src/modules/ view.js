@@ -52,6 +52,7 @@ const view = (() => {
     const figure = board.children[0].children[0]
 
     const image = document.createElement('img')
+    image.setAttribute('id', 'knight')
     image.src = 'https://www.chess.com/chess-themes/pieces/neo/150/bn.png'
 
     figure.appendChild(image)
@@ -64,13 +65,25 @@ const view = (() => {
     })
   }
 
-  function moveKnight() {
+  async function moveKnight() {
+    const knightFigure = document.getElementById('knight')
+    const board = document.getElementById('board')
     const fieldIndex = [...this.parentNode.children].indexOf(this)
     const rowTarget = parseInt(fieldIndex / BOARD_ROW, 10)
     const columnTarget = fieldIndex % BOARD_COLUMN
     console.log(rowTarget)
     console.log(columnTarget)
-    console.log(knight.knightTravails([0, 0], [rowTarget, columnTarget]))
+    const path = knight.knightTravails([0, 0], [rowTarget, columnTarget])
+    path.shift()
+    console.log('path', path)
+    for (let i = 0; i < path.length; i += 1) {
+      let [x, , , y] = path[i]
+      x = parseInt(x, 10) * 8
+      y = parseInt(y, 10)
+      console.log(x + y)
+      board.children[x + y].children[0].appendChild(knightFigure)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
   }
 
   return { loadContent }
