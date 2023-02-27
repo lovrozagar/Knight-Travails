@@ -77,6 +77,8 @@ const knight = (() => {
     console.log(`The shortest path was ${path.length - 1} moves!`)
     console.log('The moves were: ')
     path.forEach((square) => console.log(square.getCoordinate()))
+
+    return path
   }
 
   return { knightTravails }
