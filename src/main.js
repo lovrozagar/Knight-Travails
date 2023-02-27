@@ -1,3 +1,4 @@
+import knight from './modules/knight'
 import './styles/style.scss'
 
 const BOARD_ROW = 8
@@ -69,3 +70,4 @@ function addKnight() {
 createBoard()
 paintBoard()
 addKnight()
+knight.knightTravails([0, 0], [1, 2])
