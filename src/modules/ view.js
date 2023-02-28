@@ -1,14 +1,15 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable no-await-in-loop */
 import knight from './knight'
 import storage from './storage'
 import moveSoundEffect from '../assets/audio/move.mp3'
 import eatSoundEffect from '../assets/audio/eat.mp3'
+import utils from './utils'
 
 const view = (() => {
   function loadContent() {
     createBoard()
-    paintBoard()
     setKnight()
     initFieldClicks()
     storage.setKnightCoords()
@@ -34,35 +35,13 @@ const view = (() => {
     }
   }
 
-  function paintBoard() {
-    const board = document.getElementById('board')
-
-    let fieldColor = 'dark'
-    for (let i = 0; i < BOARD_ROW; i += 1) {
-      for (let j = 0; j < BOARD_COLUMN; j += 1) {
-        if (fieldColor === 'light') {
-          board.children[i * BOARD_ROW + j].classList.add('light')
-          fieldColor = 'dark'
-        } else {
-          board.children[i * BOARD_COLUMN + j].classList.add('dark')
-          fieldColor = 'light'
-        }
-      }
-      // eslint-disable-next-line no-unused-expressions
-      fieldColor === 'dark' ? (fieldColor = 'light') : (fieldColor = 'dark')
-    }
-  }
-
   function setKnight() {
     const board = document.getElementById('board')
 
     const position = storage.getKnightCoords()
-    console.log(position)
-    let [x, y] = position
-    x = parseInt(x, 10) * 8
-    y = parseInt(y, 10)
-    console.log(x, y)
-    const figure = board.children[x + y].children[0]
+    const [row, col] = position
+    const currentIndex = row * 8 + col
+    const figure = board.children[currentIndex].children[0]
 
     const image = document.createElement('img')
     image.setAttribute('id', 'knight')
@@ -134,41 +113,64 @@ const view = (() => {
     const rowTarget = parseInt(fieldIndex / BOARD_ROW, 10)
     const columnTarget = fieldIndex % BOARD_COLUMN
 
-    console.log(rowTarget)
-    console.log(columnTarget)
+    let lastMove
 
     let knightCoords = storage.getKnightCoords()
     if (typeof knightCoords[0] === 'string') {
-      knightCoords = knightCoords.split(',')
-      knightCoords = [knightCoords.map((coord) => parseInt(coord, 10))]
+      knightCoords = utils.getIntCoordsArray(knightCoords)
     }
 
-    console.log(knightCoords)
-
     const path = knight.knightTravails(knightCoords, [rowTarget, columnTarget])
-    path.shift()
-    console.log('path', path)
-    for (let i = 0; i < path.length; i += 1) {
-      await moveTimeout()
-      moveSound(i, path.length - 1)
-      let [x, , , y] = path[i]
-      x = parseInt(x, 10) * 8
-      y = parseInt(y, 10)
-      console.log(x + y)
-      board.children[x + y].children[0].appendChild(knightFigure)
 
+    for (let i = 1; i < path.length; i += 1) {
+      // WAIT A SECOND FOR EVERY MOVE
+      await utils.moveTimeout()
+      moveSound(i, path.length - 1)
+
+      // MOVE KNIGHT TO CURRENT FIELD
+      const [row, col] = utils.getIntCoordsArray(path[i])
+      const currentIndex = utils.coordsToIndex(row, col)
+      board.children[currentIndex].firstElementChild.appendChild(knightFigure)
+
+      lastMove = utils.getIntCoordsArray(path[i - 1])
+      const currentMove = [row, col]
+      paintMovePath(lastMove, currentMove)
+      // IF LAST FIELD, SET KNIGHT LOCATION TO LOCAL STORAGE, PLAY EAT SOUND
       if (i === path.length - 1) {
         eatPawn()
-        let [a, , , b] = path[i]
-        storage.setKnightCoords([parseInt(a, 10), parseInt(b, 10)])
+        storage.setKnightCoords([row, col])
       }
     }
 
     toggleBoardClicks()
   }
 
-  function moveTimeout() {
-    return new Promise((resolve) => setTimeout(resolve, 1000))
+  function paintMovePath(lastMove, currentMove) {
+    const moves = [lastMove]
+    const [lastRow, lastCol] = lastMove
+    const [currentRow, currentCol] = currentMove
+
+    // GET ALL CROSSED FIELDS IN MOVES ARRAY
+    if (Math.abs(lastRow - currentRow) > Math.abs(lastCol - currentCol)) {
+      const r = lastRow < currentRow ? -1 : 1
+      moves.push([lastRow + (currentRow - lastRow + r), lastCol])
+      moves.push([currentRow, lastCol])
+      moves.push([currentRow, currentCol])
+    } else {
+      const c = lastCol < currentCol ? -1 : 1
+      moves.push([lastRow, lastCol + (currentCol - lastCol + c)])
+      moves.push([lastRow, currentCol])
+      moves.push([currentRow, currentCol])
+    }
+
+    const board = document.getElementById('board')
+    moves.forEach((move) => {
+      const [row, col] = move
+      const moveIndex = utils.coordsToIndex(row, col)
+      board.children[moveIndex].classList.add('black')
+    })
+
+    console.log(moves)
   }
 
   return { loadContent }
