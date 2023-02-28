@@ -21,39 +21,52 @@
 }
 
 body {
+  display: grid;
+  place-items: center;
   height: 100vh;
-  background-color: lightcoral;
+  background-color: #312e2b;
 }
 
 .board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   place-items: center;
-  width: 32rem;
-  margin: 0 auto;
-  background-color: #242424;
+  min-width: 10rem;
+  max-width: 32rem;
+  margin: 1rem;
+  background-image: url('../assets/metalBoard.jpg');
+  background-size: contain;
 }
 
 .field {
-  border: 2px solid grey;
   width: 100%;
   aspect-ratio: 1 / 1;
-  overflow: hidden;
   .figure {
     height: 100%;
     width: 100%;
-    img{
+    img {
+      user-drag: none;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-drag: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
       height: 100%;
       width: 100%;
     }
   }
 }
 
-.field.light {
-  background-color: lightgray;
+.paused {
+  pointer-events: none;
 }
 
-// .figure.knight {
-//   background-image: url('https://www.chess.com/chess-themes/pieces/neo/150/bn.png');
-//   background-size: 100%;
+// .field.light {
+//   background-image: url('../assets/lightWood.svg');
+//   background-size: contain;
+// }
+
+// .field.dark {
+//   background-image: url('../assets/darkWood.svg');
+//   background-size: contain;
 // }

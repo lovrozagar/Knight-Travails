@@ -1,5 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable no-await-in-loop */
+import { doc } from 'prettier'
 import knight from './knight'
 import storage from './storage'
 
@@ -64,14 +65,14 @@ const view = (() => {
 
     const image = document.createElement('img')
     image.setAttribute('id', 'knight')
-    image.src = 'https://www.chess.com/chess-themes/pieces/neo/150/bn.png'
+    image.src = 'https://www.chess.com/chess-themes/pieces/neo_wood/150/bn.png'
 
     figure.appendChild(image)
   }
 
   function addPawn(field) {
     const figure = document.createElement('img')
-    figure.src = 'https://www.chess.com/chess-themes/pieces/neo/150/wp.png'
+    figure.src = 'https://www.chess.com/chess-themes/pieces/neo_wood/150/wp.png'
     figure.setAttribute('id', 'pawn')
     figure.setAttribute('class', 'figure')
     field.children[0].appendChild(figure)
@@ -90,8 +91,17 @@ const view = (() => {
   }
 
   function startPath() {
+    toggleBoardClicks()
     moveKnight(this)
     addPawn(this)
+  }
+
+  function toggleBoardClicks() {
+    const board = document.getElementById('board')
+    const horse = document.getElementById('knight')
+
+    board.classList.toggle('paused')
+    horse.classList.toggle('paused')
   }
 
   async function moveKnight(field) {
@@ -130,6 +140,8 @@ const view = (() => {
         storage.setKnightCoords([parseInt(a, 10), parseInt(b, 10)])
       }
     }
+
+    toggleBoardClicks()
   }
 
   function moveTimeout() {
