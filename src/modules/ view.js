@@ -1,11 +1,15 @@
+/* eslint-disable no-promise-executor-return */
+/* eslint-disable no-await-in-loop */
 import knight from './knight'
+import storage from './storage'
 
 const view = (() => {
   function loadContent() {
     createBoard()
     paintBoard()
-    addKnight()
+    setKnight()
     initFieldClicks()
+    storage.setKnightCoords()
   }
 
   const BOARD_ROW = 8
@@ -47,9 +51,16 @@ const view = (() => {
     }
   }
 
-  function addKnight() {
+  function setKnight() {
     const board = document.getElementById('board')
-    const figure = board.children[0].children[0]
+
+    const position = storage.getKnightCoords()
+    console.log(position)
+    let [x, y] = position
+    x = parseInt(x, 10) * 8
+    y = parseInt(y, 10)
+    console.log(x, y)
+    const figure = board.children[x + y].children[0]
 
     const image = document.createElement('img')
     image.setAttribute('id', 'knight')
@@ -58,32 +69,71 @@ const view = (() => {
     figure.appendChild(image)
   }
 
+  function addPawn(field) {
+    const figure = document.createElement('img')
+    figure.src = 'https://www.chess.com/chess-themes/pieces/neo/150/wp.png'
+    figure.setAttribute('id', 'pawn')
+    figure.setAttribute('class', 'figure')
+    field.children[0].appendChild(figure)
+  }
+
+  function eatPawn() {
+    const pawn = document.getElementById('pawn')
+    pawn.remove()
+  }
+
   function initFieldClicks() {
     const board = document.getElementById('board')
     board.childNodes.forEach((field) => {
-      field.addEventListener('click', moveKnight)
+      field.addEventListener('click', startPath)
     })
   }
 
-  async function moveKnight() {
+  function startPath() {
+    moveKnight(this)
+    addPawn(this)
+  }
+
+  async function moveKnight(field) {
+    console.log(field)
     const knightFigure = document.getElementById('knight')
     const board = document.getElementById('board')
-    const fieldIndex = [...this.parentNode.children].indexOf(this)
+    const fieldIndex = [...field.parentNode.children].indexOf(field)
     const rowTarget = parseInt(fieldIndex / BOARD_ROW, 10)
     const columnTarget = fieldIndex % BOARD_COLUMN
+
     console.log(rowTarget)
     console.log(columnTarget)
-    const path = knight.knightTravails([0, 0], [rowTarget, columnTarget])
+
+    let knightCoords = storage.getKnightCoords()
+    if (typeof knightCoords[0] === 'string') {
+      knightCoords = knightCoords.split(',')
+      knightCoords = [knightCoords.map((coord) => parseInt(coord, 10))]
+    }
+
+    console.log(knightCoords)
+
+    const path = knight.knightTravails(knightCoords, [rowTarget, columnTarget])
     path.shift()
     console.log('path', path)
     for (let i = 0; i < path.length; i += 1) {
+      await moveTimeout()
       let [x, , , y] = path[i]
       x = parseInt(x, 10) * 8
       y = parseInt(y, 10)
       console.log(x + y)
       board.children[x + y].children[0].appendChild(knightFigure)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      if (i === path.length - 1) {
+        eatPawn()
+        let [a, , , b] = path[i]
+        storage.setKnightCoords([parseInt(a, 10), parseInt(b, 10)])
+      }
     }
+  }
+
+  function moveTimeout() {
+    return new Promise((resolve) => setTimeout(resolve, 1000))
   }
 
   return { loadContent }
