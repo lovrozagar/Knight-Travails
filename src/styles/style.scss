@@ -43,6 +43,7 @@ body {
   width: 100%;
   aspect-ratio: 1 / 1;
   .figure {
+    position: relative;
     height: 100%;
     width: 100%;
     img {
@@ -64,4 +65,17 @@ body {
 
 .black {
   background-color: rgba(0, 0, 0, 0.5);
+}
+.numbered {
+  position: absolute;
+  top: 0.1rem;
+  right: 0.1rem;
+  display: grid;
+  place-content: center;
+  border-radius: 100%;
+  background-color: black;
+  font-size: 0.85rem;
+  font-weight: 500;
+  height: 1.125rem;
+  width: 1.125rem;
 }

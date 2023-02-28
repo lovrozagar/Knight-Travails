@@ -9,7 +9,7 @@ const utils = (() => {
   }
 
   function moveTimeout() {
-    return new Promise((resolve) => setTimeout(resolve, 1000))
+    return new Promise((resolve) => setTimeout(resolve, 800))
   }
 
   return { moveTimeout, getIntCoordsArray, coordsToIndex }

@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable no-await-in-loop */
@@ -84,15 +85,20 @@ const view = (() => {
     })
   }
 
-  function startPath() {
-    if (abortIfKnightTarget(this)) return
+  function startPath(event) {
+    const { target } = event
+    // e.stopPropagation()
+    console.log(target)
+    if (abortIfKnightTarget(target)) return
+    clearNumberedMoves()
     toggleBoardClicks()
     moveKnight(this)
     addPawn(this)
   }
 
   function abortIfKnightTarget(field) {
-    if (field.firstChild.hasChildNodes()) {
+    const knightFigure = document.getElementById('knight')
+    if (field.contains(knightFigure)) {
       return true
     }
     return false
@@ -105,6 +111,9 @@ const view = (() => {
     board.classList.toggle('paused')
     horse.classList.toggle('paused')
   }
+
+  let pathNumber = 0
+  let numbered = []
 
   async function moveKnight(field) {
     const knightFigure = document.getElementById('knight')
@@ -123,14 +132,23 @@ const view = (() => {
     const path = knight.knightTravails(knightCoords, [rowTarget, columnTarget])
 
     for (let i = 1; i < path.length; i += 1) {
-      // WAIT A SECOND FOR EVERY MOVE
+      // DELAY BEFORE MOVE
       await utils.moveTimeout()
       moveSound(i, path.length - 1)
 
       // MOVE KNIGHT TO CURRENT FIELD
       const [row, col] = utils.getIntCoordsArray(path[i])
       const currentIndex = utils.coordsToIndex(row, col)
-      board.children[currentIndex].firstElementChild.appendChild(knightFigure)
+      board.children[currentIndex].children[0].appendChild(knightFigure)
+
+      // LAST INDEX
+      if (i === path.length - 1) {
+        const numberEl = document.createElement('div')
+        numberEl.textContent = pathNumber + 1
+        numberEl.setAttribute('class', 'numbered')
+        numbered.push(numberEl)
+        board.children[currentIndex].children[0].appendChild(numberEl)
+      }
 
       lastMove = utils.getIntCoordsArray(path[i - 1])
       const currentMove = [row, col]
@@ -164,13 +182,32 @@ const view = (() => {
     }
 
     const board = document.getElementById('board')
-    moves.forEach((move) => {
+    moves.forEach((move, index) => {
       const [row, col] = move
       const moveIndex = utils.coordsToIndex(row, col)
-      board.children[moveIndex].classList.add('black')
+      if (index === 0) {
+        const numberEl = document.createElement('div')
+        numberEl.textContent = pathNumber
+        numberEl.setAttribute('class', 'numbered')
+
+        board.children[moveIndex].children[0].appendChild(numberEl)
+
+        numbered.push(numberEl)
+        pathNumber += 1
+      }
     })
+    console.log(numbered)
 
     console.log(moves)
+  }
+
+  function clearNumberedMoves() {
+    numbered.forEach((numberedNode) => {
+      numberedNode.textContent = ''
+      numberedNode.classList.remove('numbered')
+      pathNumber = 0
+    })
+    numbered = []
   }
 
   return { loadContent }
