@@ -1,8 +1,9 @@
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable no-await-in-loop */
-import { doc } from 'prettier'
 import knight from './knight'
 import storage from './storage'
+import moveSoundEffect from '../assets/audio/move.mp3'
+import eatSoundEffect from '../assets/audio/eat.mp3'
 
 const view = (() => {
   function loadContent() {
@@ -81,6 +82,20 @@ const view = (() => {
   function eatPawn() {
     const pawn = document.getElementById('pawn')
     pawn.remove()
+    eatSound()
+  }
+
+  function eatSound() {
+    const audio = new Audio(eatSoundEffect)
+    audio.play()
+  }
+
+  function moveSound(move, lastMove) {
+    // DON'T PLAY ON LAST MOVE
+    if (move < lastMove) {
+      const audio = new Audio(moveSoundEffect)
+      audio.play()
+    }
   }
 
   function initFieldClicks() {
@@ -91,9 +106,17 @@ const view = (() => {
   }
 
   function startPath() {
+    if (abortIfKnightTarget(this)) return
     toggleBoardClicks()
     moveKnight(this)
     addPawn(this)
+  }
+
+  function abortIfKnightTarget(field) {
+    if (field.firstChild.hasChildNodes()) {
+      return true
+    }
+    return false
   }
 
   function toggleBoardClicks() {
@@ -105,7 +128,6 @@ const view = (() => {
   }
 
   async function moveKnight(field) {
-    console.log(field)
     const knightFigure = document.getElementById('knight')
     const board = document.getElementById('board')
     const fieldIndex = [...field.parentNode.children].indexOf(field)
@@ -128,6 +150,7 @@ const view = (() => {
     console.log('path', path)
     for (let i = 0; i < path.length; i += 1) {
       await moveTimeout()
+      moveSound(i, path.length - 1)
       let [x, , , y] = path[i]
       x = parseInt(x, 10) * 8
       y = parseInt(y, 10)
