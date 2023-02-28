@@ -11,6 +11,7 @@ import utils from './utils'
 const view = (() => {
   function loadContent() {
     createBoard()
+    markBoardFields()
     setKnight()
     initFieldClicks()
     storage.setKnightCoords()
@@ -33,6 +34,25 @@ const view = (() => {
 
         board.appendChild(field)
       }
+    }
+  }
+
+  function markBoardFields() {
+    const board = document.getElementById('board')
+
+    let fieldColor = 'dark'
+    for (let i = 0; i < BOARD_ROW; i += 1) {
+      for (let j = 0; j < BOARD_COLUMN; j += 1) {
+        if (fieldColor === 'light') {
+          board.children[i * BOARD_ROW + j].classList.add('light')
+          fieldColor = 'dark'
+        } else {
+          board.children[i * BOARD_COLUMN + j].classList.add('dark')
+          fieldColor = 'light'
+        }
+      }
+      // eslint-disable-next-line no-unused-expressions
+      fieldColor === 'dark' ? (fieldColor = 'light') : (fieldColor = 'dark')
     }
   }
 
@@ -195,7 +215,11 @@ const view = (() => {
         numbered.push(numberEl)
         pathNumber += 1
       }
+      if (board.children[moveIndex].classList.contains('dark'))
+        board.children[moveIndex].classList.add('dark-wood')
+      else board.children[moveIndex].classList.add('light-wood')
     })
+
     console.log(numbered)
 
     console.log(moves)
@@ -214,3 +238,5 @@ const view = (() => {
 })()
 
 export default view
+
+// TODO: hover spots

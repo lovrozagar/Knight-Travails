@@ -74,11 +74,8 @@ const knight = (() => {
       const nextSquare = path.at(-1).getPredecessor()
       path.push(nextSquare)
     }
-    console.log(`The shortest path was ${path.length - 1} moves!`)
-    console.log('The moves were: ')
     const result = []
     path.forEach((square) => result.push(square.getCoordinate()))
-    console.log(result)
     return result
   }
 
