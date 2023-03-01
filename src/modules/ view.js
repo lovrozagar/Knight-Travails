@@ -66,6 +66,7 @@ const view = (() => {
 
     const image = document.createElement('img')
     image.setAttribute('id', 'knight')
+    image.setAttribute('class', 'knight')
     image.src = 'https://www.chess.com/chess-themes/pieces/neo_wood/150/bn.png'
 
     figure.appendChild(image)
@@ -75,7 +76,7 @@ const view = (() => {
     const figure = document.createElement('img')
     figure.src = 'https://www.chess.com/chess-themes/pieces/neo_wood/150/wp.png'
     figure.setAttribute('id', 'pawn')
-    figure.setAttribute('class', 'figure')
+    figure.setAttribute('class', 'pawn')
     field.children[0].appendChild(figure)
   }
 
