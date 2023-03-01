@@ -4,11 +4,8 @@
 /* eslint-disable no-await-in-loop */
 import knight from './knight'
 import storage from './storage'
-import startSoundEffect from '../assets/audio/start.mp3'
-import pawnSetSoundEffect from '../assets/audio/pawnSet.mp3'
-import moveSoundEffect from '../assets/audio/move.mp3'
-import eatSoundEffect from '../assets/audio/eat.mp3'
 import utils from './utils'
+import audio from './audio'
 
 const view = (() => {
   function loadContent() {
@@ -20,9 +17,20 @@ const view = (() => {
     // SET KNIGHT FIGURE AND POSITION
     storage.setKnightCoords()
     setKnight()
-    // INIT FIELDS AND BUTTONS
+    // INIT FIELDS, BUTTONS AND APP HEIGHT
     initFieldClicks()
     initButtons()
+    initAppHeight()
+  }
+
+  // MOBILE APP HEIGHT 100 VH FIX
+  function initAppHeight() {
+    const appHeight = () => {
+      const doc = document.documentElement
+      doc.style.setProperty('--app-height', `${window.innerHeight}px`)
+    }
+    window.addEventListener('resize', appHeight)
+    appHeight()
   }
 
   // BOARD
@@ -85,18 +93,18 @@ const view = (() => {
   }
 
   function addPawn(field) {
+    audio.pawnSet()
     const figure = document.createElement('img')
     figure.src = 'https://www.chess.com/chess-themes/pieces/neo_wood/150/wp.png'
     figure.setAttribute('id', 'pawn')
     figure.setAttribute('class', 'pawn')
     field.children[0].appendChild(figure)
-    pawnSetSound()
   }
 
   function eatPawn() {
     const pawn = document.getElementById('pawn')
+    audio.eat()
     pawn.remove()
-    eatSound()
   }
 
   // FIELDS
@@ -160,7 +168,7 @@ const view = (() => {
     for (let i = 1; i < path.length; i += 1) {
       // DELAY BEFORE MOVE
       await utils.moveTimeout()
-      moveSound(i, path.length - 1)
+      audio.move(i, path.length - 1)
 
       // MOVE KNIGHT TO CURRENT FIELD
       const [row, col] = utils.getIntCoordsArray(path[i])
@@ -253,15 +261,18 @@ const view = (() => {
     lightWood.forEach((field) => field.classList.remove('light-wood'))
     darkWood.forEach((field) => field.classList.remove('dark-wood'))
     removeNumbers()
+    audio.wipeBoard()
   }
 
   function resetKnight() {
     const board = document.getElementById('board')
     const knightFigure = document.getElementById('knight')
 
+    if (board.children[0].children[0].contains(knightFigure)) return
     board.children[0].children[0].appendChild(knightFigure)
     storage.setKnightCoords([0, 0])
     removeNumbers()
+    audio.move()
   }
 
   function removeNumbers() {
@@ -288,33 +299,8 @@ const view = (() => {
     const board = document.getElementById('board')
     if (board.classList.contains('guide')) {
       board.classList.remove('guide')
-      startGameSound()
+      audio.start()
     }
-  }
-
-  // SOUNDS
-
-  function startGameSound() {
-    const audio = new Audio(startSoundEffect)
-    audio.play()
-  }
-
-  function pawnSetSound() {
-    const audio = new Audio(pawnSetSoundEffect)
-    audio.play()
-  }
-
-  function moveSound(move, lastMove) {
-    // DON'T PLAY ON LAST MOVE
-    if (move < lastMove) {
-      const audio = new Audio(moveSoundEffect)
-      audio.play()
-    }
-  }
-
-  function eatSound() {
-    const audio = new Audio(eatSoundEffect)
-    audio.play()
   }
 
   return { loadContent }
