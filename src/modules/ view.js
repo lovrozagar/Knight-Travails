@@ -15,6 +15,7 @@ const view = (() => {
     setKnight()
     initFieldClicks()
     storage.setKnightCoords()
+    initButtons()
   }
 
   const BOARD_ROW = 8
@@ -233,6 +234,37 @@ const view = (() => {
       pathNumber = 0
     })
     numbered = []
+  }
+
+  function initButtons() {
+    const clearButton = document.getElementById('clear-board')
+    const resetButton = document.getElementById('reset-knight')
+
+    clearButton.addEventListener('click', clearBoard)
+    resetButton.addEventListener('click', resetKnight)
+  }
+
+  function clearBoard() {
+    const lightWood = document.querySelectorAll('.light-wood')
+    const darkWood = document.querySelectorAll('.dark-wood')
+
+    lightWood.forEach((field) => field.classList.remove('light-wood'))
+    darkWood.forEach((field) => field.classList.remove('dark-wood'))
+    removeNumbers()
+  }
+
+  function resetKnight() {
+    const board = document.getElementById('board')
+    const knightFigure = document.getElementById('knight')
+
+    board.children[0].children[0].appendChild(knightFigure)
+    storage.setKnightCoords([0, 0])
+    removeNumbers()
+  }
+
+  function removeNumbers() {
+    const numbers = document.querySelectorAll('.numbered')
+    numbers.forEach((field) => field.remove())
   }
 
   return { loadContent }
