@@ -4,19 +4,28 @@
 /* eslint-disable no-await-in-loop */
 import knight from './knight'
 import storage from './storage'
+import startSoundEffect from '../assets/audio/start.mp3'
+import pawnSetSoundEffect from '../assets/audio/pawnSet.mp3'
 import moveSoundEffect from '../assets/audio/move.mp3'
 import eatSoundEffect from '../assets/audio/eat.mp3'
 import utils from './utils'
 
 const view = (() => {
   function loadContent() {
+    // CREATE BOARD AND BLACK/WHITE FIELDS
     createBoard()
     markBoardFields()
-    setKnight()
-    initFieldClicks()
+    // INITIALIZE GUIDE IF FIRST LOAD / NO LOCAL STORAGE
+    initGuide()
+    // SET KNIGHT FIGURE AND POSITION
     storage.setKnightCoords()
+    setKnight()
+    // INIT FIELDS AND BUTTONS
+    initFieldClicks()
     initButtons()
   }
+
+  // BOARD
 
   const BOARD_ROW = 8
   const BOARD_COLUMN = 8
@@ -57,6 +66,8 @@ const view = (() => {
     }
   }
 
+  // FIGURES
+
   function setKnight() {
     const board = document.getElementById('board')
 
@@ -79,6 +90,7 @@ const view = (() => {
     figure.setAttribute('id', 'pawn')
     figure.setAttribute('class', 'pawn')
     field.children[0].appendChild(figure)
+    pawnSetSound()
   }
 
   function eatPawn() {
@@ -87,18 +99,7 @@ const view = (() => {
     eatSound()
   }
 
-  function eatSound() {
-    const audio = new Audio(eatSoundEffect)
-    audio.play()
-  }
-
-  function moveSound(move, lastMove) {
-    // DON'T PLAY ON LAST MOVE
-    if (move < lastMove) {
-      const audio = new Audio(moveSoundEffect)
-      audio.play()
-    }
-  }
+  // FIELDS
 
   function initFieldClicks() {
     const board = document.getElementById('board')
@@ -109,11 +110,10 @@ const view = (() => {
 
   function startPath(event) {
     const { target } = event
-    // e.stopPropagation()
-    console.log(target)
+
     if (abortIfKnightTarget(target)) return
     clearNumberedMoves()
-    toggleBoardClicks()
+    toggleClicks()
     moveKnight(this)
     addPawn(this)
   }
@@ -126,13 +126,17 @@ const view = (() => {
     return false
   }
 
-  function toggleBoardClicks() {
+  function toggleClicks() {
     const board = document.getElementById('board')
     const horse = document.getElementById('knight')
+    const options = document.getElementById('options')
 
     board.classList.toggle('paused')
     horse.classList.toggle('paused')
+    options.classList.toggle('paused')
   }
+
+  // PATH
 
   let pathNumber = 0
   let numbered = []
@@ -182,7 +186,7 @@ const view = (() => {
       }
     }
 
-    toggleBoardClicks()
+    toggleClicks()
   }
 
   function paintMovePath(lastMove, currentMove) {
@@ -221,10 +225,6 @@ const view = (() => {
         board.children[moveIndex].classList.add('dark-wood')
       else board.children[moveIndex].classList.add('light-wood')
     })
-
-    console.log(numbered)
-
-    console.log(moves)
   }
 
   function clearNumberedMoves() {
@@ -235,6 +235,8 @@ const view = (() => {
     })
     numbered = []
   }
+
+  // BUTTONS
 
   function initButtons() {
     const clearButton = document.getElementById('clear-board')
@@ -265,6 +267,54 @@ const view = (() => {
   function removeNumbers() {
     const numbers = document.querySelectorAll('.numbered')
     numbers.forEach((field) => field.remove())
+  }
+
+  // GUIDE
+
+  function initGuide() {
+    showGuideIfFirstLoad()
+    const board = document.getElementById('board')
+    board.addEventListener('click', hideGuide, { once: true })
+  }
+
+  function showGuideIfFirstLoad() {
+    if (!storage.getKnightCoords()) {
+      const board = document.getElementById('board')
+      board.classList.add('guide')
+    }
+  }
+
+  function hideGuide() {
+    const board = document.getElementById('board')
+    if (board.classList.contains('guide')) {
+      board.classList.remove('guide')
+      startGameSound()
+    }
+  }
+
+  // SOUNDS
+
+  function startGameSound() {
+    const audio = new Audio(startSoundEffect)
+    audio.play()
+  }
+
+  function pawnSetSound() {
+    const audio = new Audio(pawnSetSoundEffect)
+    audio.play()
+  }
+
+  function moveSound(move, lastMove) {
+    // DON'T PLAY ON LAST MOVE
+    if (move < lastMove) {
+      const audio = new Audio(moveSoundEffect)
+      audio.play()
+    }
+  }
+
+  function eatSound() {
+    const audio = new Audio(eatSoundEffect)
+    audio.play()
   }
 
   return { loadContent }
